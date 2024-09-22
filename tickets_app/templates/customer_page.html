@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Customer Page</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.username }}!</h1>
+    <h2>Available events</h2>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.title }}
+                <!-- {% if not enrollment.completed %}
+                    <a href="{% url 'update_progress' enrollment.id %}">Update Progress</a>
+                {% else %}
+                    Completed
+                {% endif %} -->
+            </li>
+        {% empty %}
+            <li>No available events.</li>
+        {% endfor %}
+    </ul><br>
+    <p>test</p>
+    <!-- <h2><a href="{% url 'available_events' %}">Browse Available Events</a></h2><br> -->
+    <h4><a href="{% url 'index' %}">Home Page</a></h4>
+</body>
+</html>

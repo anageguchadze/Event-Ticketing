@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Delete Event</title>
+</head>
+<body>
+    <h1>Delete Event</h1>
+    <p>Are you sure you want to delete the event "{{ event.title }}"?</p>
+    <form method="POST">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+    </form>
+</body>
+</html>

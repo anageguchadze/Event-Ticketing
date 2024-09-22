@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Events</title>
+</head>
+<body>
+    <h1>Your Events</h1>
+    <a href="{% url 'create_event' %}">Create New Event</a>
+    <ul>
+        {% for event in events %}
+        <li>
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <a href="{% url 'update_event' event.id %}">Edit</a> | 
+            <a href="{% url 'delete_event' event.id %}">Delete</a>
+        </li>
+        {% empty %}
+        <p>No events available.</p>
+        {% endfor %}
+    </ul>
+    <h4><a href="{% url 'index' %}">Home Page</a></h4>
+</body>
+</html>
