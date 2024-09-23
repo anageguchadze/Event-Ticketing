@@ -5,23 +5,35 @@
 </head>
 <body>
     <h1>Welcome, {{ user.username }}!</h1>
-    <h2>Available events</h2>
+    <h2>Available Events</h2>
     <ul>
         {% for event in events %}
             <li>
-                {{ event.title }}
-                <!-- {% if not enrollment.completed %}
-                    <a href="{% url 'update_progress' enrollment.id %}">Update Progress</a>
-                {% else %}
-                    Completed
-                {% endif %} -->
+                <strong>{{ event.title }}</strong> <br>
+                <p><strong>Date:</strong> {{ event.date }}</p>
+                <p><strong>Location:</strong> {{ event.location }}</p>
+                <p><strong>Description:</strong> {{ event.description }}</p>
+                <p><strong>Price:</strong> ${{ event.price }}</p>
+                <p><strong>Available Tickets:</strong> {{ event.quantity }}</p>
+
+                <form method="POST" action="{% url 'buy_event' event.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Buy</button>
+                </form>
             </li>
         {% empty %}
-            <li>No available events.</li>
+            <li>No available events at the moment.</li>
         {% endfor %}
-    </ul><br>
-    <p>test</p>
-    <!-- <h2><a href="{% url 'available_events' %}">Browse Available Events</a></h2><br> -->
+    </ul>
+
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <br>
     <h4><a href="{% url 'index' %}">Home Page</a></h4>
 </body>
 </html>

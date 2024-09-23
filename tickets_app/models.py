@@ -31,8 +31,7 @@ class Customer_page(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role': 'customer'})
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     buy_ticket = models.BooleanField(default=False)
-    # Add the `completed` field if required
-    completed = models.BooleanField(default=False)  # Assuming it's a Boolean field
+    completed = models.BooleanField(default=False) 
 
     def __str__(self):
         return f"{self.customer.user.username} - {self.event.name} - {'Completed' if self.completed else 'In Progress'}"

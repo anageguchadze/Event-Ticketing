@@ -33,14 +33,12 @@ def register(request):
         username = request.POST['username']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
-        role = request.POST['role']  # 'organizer' or 'customer'
+        role = request.POST['role'] 
         
         if password == confirm_password:
             try:
-                # First create the user object
                 user = User.objects.create_user(username=username, password=password)
 
-                # Then create the profile object and link it to the user
                 Profile.objects.create(user=user, role=role)
 
                 messages.success(request, 'Registration successful! You can now log in.')
@@ -65,8 +63,8 @@ def event_list(request):
 
 @login_required
 def create_event(request):
-    profile = get_object_or_404(Profile, user=request.user)
-    if profile.role != 'organizer':
+    profile = get_object_or_404(User, id=request.user.id)  
+    if profile.profile.role != 'organizer':  
         return redirect('index')
 
     if request.method == 'POST':
@@ -84,9 +82,9 @@ def create_event(request):
 
 @login_required
 def update_event(request, event_id):
-    profile = get_object_or_404(Profile, user=request.user)
-    event = get_object_or_404(Event, id=event_id, instructor=profile)
-    
+    profile = get_object_or_404(User, id=request.user.id)
+    event = get_object_or_404(Event, id=event_id, organizer=profile)
+
     if request.method == 'POST':
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
@@ -95,69 +93,49 @@ def update_event(request, event_id):
             return redirect('event_list')
     else:
         form = EventForm(instance=event)
-    
+
     return render(request, 'update_event.html', {'form': form})
 
 @login_required
 def delete_event(request, event_id):
-    profile = get_object_or_404(Profile, user=request.user)
-    event = get_object_or_404(Event, id=event_id, instructor=profile)
-    
+    profile = get_object_or_404(User, id=request.user.id)
+    event = get_object_or_404(Event, id=event_id, organizer=profile)
+
     if request.method == 'POST':
         event.delete()
         messages.success(request, 'Event deleted successfully!')
         return redirect('event_list')
-    
+
     return render(request, 'delete_event.html', {'event': event})
 
-@login_required
+
+def event_list(request):
+    events = Event.objects.all()  
+    return render(request, 'event_list.html', {'events': events})
+
 @login_required
 def organizer_page(request):
     profile = get_object_or_404(Profile, user=request.user)
     if profile.role != 'organizer':
         return redirect('index')  
     
-    # Filter events by the correct field, which is 'organizer', not 'instructor'
     events = Event.objects.filter(organizer=profile.user)
     
     return render(request, 'organizer_page.html', {'events': events})
 
+def customer_page(request):
+    events = Event.objects.all()  
+    return render(request, 'customer_page.html', {'events': events})
 
 @login_required
-def customer_page(request):
-    profile = get_object_or_404(Profile, user=request.user)
-    if profile.role != 'customer':
-        return redirect('index')  
-    
-    # # Enrolled courses
-    # enrollments = Enrollment.objects.filter(student=profile)
-    # events = Event.objects.filter(id__in=enrollments.values_list('event_id', flat=True))
-    
-    return render(request, 'customer_page.html')
-    # {'courses': courses, 'enrollments': enrollments}
+def buy_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
 
-# @login_required
-# def buy_ticket(request, event_id):
-#     profile = get_object_or_404(User, user=request.user)
-#     event = get_object_or_404(Event, id=event_id)
-    
-#     if request.method == 'POST':
-#         Enrollment.objects.get_or_create(student=profile, course=course)
-#         messages.success(request, 'Enrolled in course successfully!')
-#         return redirect('student_page')
-    
-#     return render(request, 'enroll_course.html', {'course': course})
+    if event.quantity > 0:
+        event.quantity -= 1  
+        event.save()         
+        messages.success(request, f'You successfully bought a ticket for {event.title}!')
+    else:
+        messages.error(request, f'Sorry, no tickets available for {event.title}.')
 
-
-
-# @login_required
-# def available_events(request):
-#     profile = get_object_or_404(User, user=request.user)
-#     if profile.role != 'customer':
-#         return redirect('index')  
-    
-#     # Get all courses excluding those the student is already enrolled in
-#     # enrolled_course_ids = Enrollment.objects.filter(student=profile).values_list('course_id', flat=True)
-#     available_events = Event.objects.exclude(id__in=enrolled_course_ids)
-    
-#     return render(request, 'available_courses.html', {'courses': available_courses})
+    return redirect('customer_page')  
